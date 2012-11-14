@@ -22,7 +22,15 @@ LEFT OUTER JOIN Sys.Index_columns IC
 LEFT OUTER JOIN Sys.Indexes I
 	ON C.object_id = I.object_id
 	AND IC.index_id = I.index_id
-LEFT OUTER JOIN Sys.foreign_key_columns FC
+LEFT OUTER JOIN 
+(
+	SELECT 
+		 MAX(SUB_FC.parent_object_id) AS parent_object_id
+		,MAX(SUB_FC.parent_column_id) AS parent_column_id
+	FROM Sys.foreign_key_columns SUB_FC
+	WHERE SUB_FC.parent_object_id = object_id('$(TBL)')
+	GROUP BY SUB_FC.parent_column_id
+) FC
 	ON C.object_id = FC.parent_object_id
 	AND C.column_id = FC.parent_column_id
 WHERE C.object_id = object_id('$(TBL)')
